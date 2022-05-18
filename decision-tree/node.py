@@ -9,12 +9,27 @@ class Node:
         self.feature_value = None
         self.node_prediction = None
 
-    def gini_best_score(self, y):
+    def calculate_gini_index(self, y):
+        zeroes = y.count(0)
+        ones = y.count(1)
+        gini_index = 1 - (zeroes / len(y)) ** 2 - (ones / len(y)) ** 2
+        return gini_index
+
+    def gini_best_score(self, y, possible_splits):
         best_gain = -np.inf
         best_idx = 0
-
-        # TODO find position of best data split
-
+        for possible_split in possible_splits:
+            left = y[:possible_split].tolist()
+            right = y[possible_split:].tolist()
+            if len(left) == 0 or len(right) == 0:
+                continue
+            gini_index_left = self.calculate_gini_index(left)
+            gini_index_right = self.calculate_gini_index(right)
+            gini_total = self.calculate_gini_index(y.tolist())
+            gini_gain = gini_total - (len(left) / len(y)) * gini_index_left - (len(right) / len(y)) * gini_index_right
+            if gini_gain > best_gain:
+                best_gain = gini_gain
+                best_idx = possible_split
         return best_idx, best_gain
 
     def split_data(self, X, y, idx, val):
